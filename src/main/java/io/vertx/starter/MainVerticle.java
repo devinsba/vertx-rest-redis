@@ -11,6 +11,8 @@ import io.vertx.redis.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 public class MainVerticle extends AbstractVerticle {
   private static final Logger log = LoggerFactory.getLogger(MainVerticle.class);
 
@@ -33,12 +35,12 @@ public class MainVerticle extends AbstractVerticle {
         // This handler will be called for every request
         HttpServerResponse response = routingContext.response();
         log.info("request1: {}", routingContext);
-        client.send(Request.cmd(Command.TIME), result -> {
+        client.send(Request.cmd(Command.SET).arg("timestamp").arg(String.valueOf(System.currentTimeMillis())).arg("GET"), result -> {
           log.info("request2: {}", routingContext);
           response.putHeader("content-type", "text/plain");
 
           // Write to the response and end it
-          response.end(result.result().toString());
+          response.end(Optional.ofNullable(result.result()).toString());
         });
       });
 
